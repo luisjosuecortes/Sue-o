@@ -1,0 +1,133 @@
+\chapter{Metodología}
+\chaptermark{Metodología}
+\label{metodologia}
+
+Este capítulo describe la metodología implementada para analizar hipnogramas mediante técnicas de procesamiento del lenguaje natural. La metodología incluye preprocesamiento de datos, tokenización de hipnogramas, entrenamiento de modelos Word2Vec y desarrollo de un encoder basado en arquitectura Transformer.
+
+\section{Dataset}
+
+El dataset consiste en 10 hipnogramas de segunda noche, obtenidos de pacientes que participaron en estudios de sueño. Cada hipnograma contiene aproximadamente 900 épocas (cada época corresponde a 30 segundos), registradas según el estándar AASM.
+
+Los pacientes están identificados por códigos: AR\_2, DG\_2, EL\_2, GA\_2, IN\_2, JS\_2, LL\_2, SS\_2, VB\_2 y VC\_2.
+
+\subsection{Etapas del Sueño en el Dataset}
+
+De acuerdo con el archivo README del dataset, las etapas se clasifican según:
+\begin{itemize}
+    \item 0 = Vigilia (W)
+    \item 1 = Etapa 1 (N1)
+    \item 2 = Etapa 2 (N2)
+    \item 3 = Etapa 3 (N3)
+    \item 4 = Etapa 4 (N4)
+    \item 5 = REM (Movimientos Oculares Rápidos)
+    \item 6 = Movimiento
+    \item 7 = Sin clasificar / No puntuado
+\end{itemize}
+
+\section{Preprocesamiento}
+
+\subsection{Lectura de Hipnogramas}
+
+Cada archivo contiene tres columnas:
+\begin{enumerate}
+    \item Número de época (1, 2, 3, \ldots)
+    \item Etapa de sueño (scoring limpio)
+    \item Etapa de sueño (scoring quasi-limpio)
+\end{enumerate}
+
+Para este estudio, se utiliza la segunda columna (scoring limpio) como la clasificación principal.
+
+\subsection{Tokenización}
+
+Se implementan tres estrategias de tokenización:
+
+\subsubsection{Tokenización Simple}
+Cada etapa numérica se convierte en un token individual:
+$$[7, 7, 0, 1, 2, 2, \ldots] \rightarrow [``7'', ``7'', ``0'', ``1'', ``2'', ``2'', \ldots]$$
+
+\subsubsection{Bigramas de Transiciones}
+Se crean tokens que representan pares de transiciones consecutivas:
+$$[7, 7, 0, 1, 2, 2] \rightarrow [``7→7'', ``7→0'', ``0→1'', ``1→2'', ``2→2'']$$
+
+\subsubsection{Trigramas de Secuencias}
+Se crean tokens que representan tripletas consecutivas:
+$$[7, 7, 0, 1, 2] \rightarrow [``7→7→0'', ``7→0→1'', ``0→1→2'']$$
+
+\section{Implementación de Word2Vec}
+
+\subsection{Configuración del Modelo}
+
+Se utiliza Gensim (biblioteca de Python) para entrenar modelos Word2Vec con los siguientes hiperparámetros:
+
+\begin{itemize}
+    \item \textbf{Tamaño de ventana (window):} 5 (contexto de 5 épocas antes y después)
+    \item \textbf{Dimensión de embeddings (vector\_size):} 100
+    \item \textbf{Arquitectura:} Skip-gram (adecuada para datasets pequeños)
+    \item \textbf{Tasa de aprendizaje mínimo (min\_alpha):} 0.0001
+    \item \textbf{Muestra palabras de baja frecuencia (sample):} 1e-5
+    \item \textbf{Número de iteraciones (epochs):} 100
+\end{itemize}
+
+\subsection{Extracción de Embeddings}
+
+Una vez entrenado el modelo, se extraen los embeddings de:
+\begin{itemize}
+    \item Etapas individuales (0, 1, 2, 3, 4, 5, 6, 7)
+    \item Transiciones (bigramas)
+    \item Secuencias (trigramas)
+\end{itemize}
+
+\section{Encoder Transformer}
+
+\subsection{Arquitectura del Modelo}
+
+Se desarrolla un encoder basado en arquitectura Transformer con las siguientes características:
+
+\begin{itemize}
+    \item \textbf{Capa de Embeddings:} Convierte tokens a vectores de dimensión 128
+    \item \textbf{Codificación Posicional:} Señales sinusoidales para capturar orden temporal
+    \item \textbf{Capas de Atención Multi-Cabeza:} 4 capas con 8 cabezas cada una
+    \item \textbf{Feed-Forward:} Redes neuronales con dimensión interna 512
+    \item \textbf{Normalización:} Layer Normalization
+    \item \textbf{Dropout:} 0.1 para regularización
+\end{itemize}
+
+\subsection{Objetivo de Entrenamiento}
+
+El encoder se entrena para:
+\begin{itemize}
+    \item Predecir la siguiente etapa dado un contexto
+    \item Reconstruir hipnogramas completos a partir de embeddings
+    \item Capturar dependencias temporales a largo plazo
+\end{itemize}
+
+\section{Análisis de Embeddings}
+
+\subsection{Reducción Dimensional}
+
+Se aplican técnicas de reducción dimensional para visualizar el espacio de embeddings:
+
+\begin{itemize}
+    \item \textbf{PCA (Análisis de Componentes Principales):} Reducción a 2-3 dimensiones
+    \item \textbf{t-SNE (t-distributed Stochastic Neighbor Embedding):} Reducción no lineal preservando estructura local
+\end{itemize}
+
+\subsection{Clustering}
+
+Se aplican algoritmos de clustering para identificar grupos de patrones similares:
+\begin{itemize}
+    \item K-means
+    \item DBSCAN
+    \item Clustering jerárquico
+\end{itemize}
+
+\section{Métricas de Evaluación}
+
+Las métricas utilizadas incluyen:
+
+\begin{itemize}
+    \item \textbf{Similitud Coseno:} Para comparar embeddings
+    \item \textbf{Precisión de Transiciones:} Porcentaje de transiciones predecidas correctamente
+    \item \textbf{Distancias en Espacio de Embeddings:} Para identificar patrones anómalos
+\end{itemize}
+

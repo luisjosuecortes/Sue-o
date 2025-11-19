@@ -1,0 +1,89 @@
+
+%===========================================================================
+%
+%
+%   
+%   Facultad de Ciencias
+%   UAEM
+%   Cuernavaca, Morelos
+%
+%   Creado por:
+%   Andrea Avena Koenigsberger
+%   Bruno Lara 
+%   2015
+%
+%
+%   Actualizacion 2019
+%   Abel Trejo
+%   Bruno Lara
+%
+%
+%===========================================================================
+%
+%	Este es un ejemplo para escribir una tesis usando la clase tesis_fc.cls
+%
+%	Las opciones para \documentclass son:
+%
+%	chico: tamaño de tesis pequeño (estandar)
+%	grande: tamaño carta (para borradores)
+%
+%	dobleespacio: doble espacio entre lineas  (para borradores)
+%
+%	doslados: se imprime de ambos lados de las hojas
+%	unlado: se imprime de un solo lado de las hojas
+%
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\sloppy
+
+\documentclass[chico, unlado]{tesis_fc}          % LaTeX 2e 
+
+\graphicspath{{imagenes/}}   %directorio donde estan las imagenes
+
+
+
+\begin{document}
+
+
+\titulo{Uso de datos biométricos para amplificar la ilusión de pertenencia del cuerpo en entornos de realidad virtual.}
+\nombre{OLLIN VILLALON VILLAREAL}
+\carrera{LICENCIADO EN CIENCIAS}
+\area{CIENCIAS COMPUTACIONALES Y COMPUTACIÓN CIENTÍFICA}
+\director{BRUNO LARA GUZMÁN}
+\fecha{\today}  % Usa \today si quieres que automáticamente te ponga la 
+                   % fecha de compilación
+
+
+\resumen{
+La ilusión de pertenencia del cuerpo es una experiencia subjetiva en la que nuestro cerebro integra información perceptual para crear la sensación de un cuerpo que habitamos y que controlamos. Este fenómeno ha sido estudiado en situaciones como la ilusión de la mano de goma, donde una mano falsa se utiliza para manipular la percepción del cuerpo. Al utilizar la ilusión de pertenencia del cuerpo en un entorno de realidad virtual, se puede incluir información biométrica, como el ritmo cardiaco, para efectuar cambios sutiles al avatar virtual y lograr una mejor ilusión. En este proyecto, se empleará un lector de ritmo cardíaco utilizando la plataforma de prototipado electrónico Arduino, que se integrará en la tecnología de realidad virtual para proporcionar información en tiempo real sobre la frecuencia cardíaca del participante. Esta información se utilizará para sincronizar el ritmo cardíaco con alguna característica del avatar virtual, tal como el color de la mano/brazo.  Esta extra información hace que la ilusión de pertenencia del cuerpo sea mas real. Se espera que este enfoque híbrido de tecnología de realidad virtual y biometría pueda mejorar la eficacia de diferentes terapias médicas. Entre ellas podemos mencionar el tratamiento del dolor de miembro fantasma en pacientes amputados y aquellas terapias para recuperar el control de algún miembro, cuando este se pierde o se vuelve errático, como en el caso de pacientes que sufrieron un infarto cerebral.
+}
+
+
+\frontmatter
+\maketitle
+\newpage
+\makeresumen
+\tableofcontents
+\listoffigures
+
+\mainmatter
+
+\chapter{Introducción}
+\chaptermark{Introducción}
+\label{intro}
+
+\section{Justificación}
+\sectionmark{justificacion}
+\label{justificacion}
+
+
+
+
+\bibliographystyle{apalike}
+%\bibliographystyle{apa_esp}
+
+\bibliography{bibliografia_fc}
+
+\end{document}

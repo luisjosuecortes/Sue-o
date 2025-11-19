@@ -1,0 +1,468 @@
+
+%===========================================================================
+%
+%
+%   
+%   Facultad de Ciencias
+%   UAEM
+%   Cuernavaca, Morelos
+%
+%   Creado por:
+%   Andrea Avena Koenigsberger
+%   Bruno Lara 
+%   2015
+%
+%
+%   Actualizacion 2019
+%   Abel Trejo
+%   Bruno Lara
+%
+%
+%===========================================================================
+%
+%	Este es un ejemplo para escribir una tesis usando la clase tesis_fc.cls
+%
+%	Las opciones para \documentclass son:
+%
+%	chico: tamaño de tesis pequeño (estandar)
+%	grande: tamaño carta (para borradores)
+%
+%	dobleespacio: doble espacio entre lineas  (para borradores)
+%
+%	doslados: se imprime de ambos lados de las hojas
+%	unlado: se imprime de un solo lado de las hojas
+%
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\sloppy
+
+\documentclass[chico, unlado]{tesis_fc}          % LaTeX 2e 
+\usepackage{caption}
+\captionsetup{font=footnotesize}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.7}
+\usepackage{placeins}
+\usepackage[utf8]{inputenc} %para escribir acentos y ñ
+%\usepackage{apacite} %Paquete para citar apa6
+%\usepackage{natbib}
+\usepackage{tabulary}
+\usepackage{adjustbox}
+\usepackage{rotating}
+\usepackage{color,colortbl} %definir colores\right) 
+\usepackage{caption}
+\usepackage[T1]{fontenc}        % enable Cork Encoding
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage[natbibapa]{apacite}
+\usepackage{morefloats}
+\captionsetup[mycapequ]{labelformat=empty}
+\DeclareCaptionType{mycapequ}[][List of equations]
+
+\graphicspath{{img/}}   %directorio donde estan las imagenes
+
+\newcommand{\blg}[1]{\textcolor{red}{{(\textbf{blg}: #1)}}}
+
+
+
+\begin{document}
+
+
+\titulo{Relación entre los vectores de incrustación de un LLM y la dinámica funcional durante el sueño}
+\nombre{Luis Josué Cortés Anzurez}
+\carrera{LICENCIATURA EN INTELIGENCIA ARTIFICIAL}
+\area{CIENCIAS COMPUTACIONALES Y COMPUTACIÓN CIENTÍFICA}
+\director{Dr. J. Daniel Arzate Mena}
+\fecha{Mayo 2025}
+
+
+\resumen{%
+Esta investigación propone una metodología innovadora para analizar hipnogramas del sueño mediante técnicas avanzadas de procesamiento de lenguaje natural (NLP). El estudio transforma las etapas del sueño en un ``lenguaje'' artificial, donde cada etapa representa una ``palabra'' y sus transiciones forman ``secuencias semánticas''. Utilizando modelos de embeddings (Word2Vec) y arquitecturas Transformer, se generan representaciones vectoriales que capturan patrones ocultos en la arquitectura del sueño. La metodología permite correlacionar estas representaciones con la dinámica funcional cerebral, abriendo nuevas vías para el diagnóstico automatizado de trastornos del sueño. El dataset consta de 10 hipnogramas de segunda noche, cada uno con ~900 épocas de sueño clasificadas según el estándar AASM. Los objetivos incluyen: (1) implementar Word2Vec para generar embeddings de transiciones de etapas del sueño, (2) desarrollar un encoder basado en arquitectura Transformer, (3) analizar la estructura del espacio de embeddings mediante reducción dimensional, y (4) explorar la aplicabilidad de LLMs fine-tuneados para generar análisis interpretativos. Los resultados esperados incluyen la identificación de fenotipos de sueño y la demostración de que las técnicas de NLP pueden capturar información neurobiológica significativa a partir de secuencias de hipnogramas.
+}
+
+
+\frontmatter
+\maketitle
+\newpage
+\makeresumen
+
+\section*{Agradecimientos}
+Le agradezco a Andrej Karpathy por inspirarme a darle sentido a muchas cosas que he hecho en la carrera y por mostrarme que la inteligencia artificial no es solo código, sino un puente entre las matemáticas y la comprensión humana del mundo.
+
+\tableofcontents
+\listoffigures
+
+\mainmatter
+
+\chapter{Introducción}
+\chaptermark{Introducción}
+\label{intro}
+
+El sueño es un fenómeno neurobiológico fundamental que ocupa aproximadamente un tercio de la vida humana. Durante el sueño, el cerebro atraviesa una serie de etapas bien definidas que conforman la ``arquitectura del sueño'', un patrón cíclico que se repite múltiples veces durante la noche. La caracterización precisa de esta arquitectura es esencial para diagnosticar trastornos del sueño, evaluar tratamientos y comprender la relación entre el sueño y la salud general.
+
+\section{Contexto y Planteamiento del Problema}
+\label{planteamiento}
+
+\subsection{El Sueño como Fenómeno Complejo}
+
+El sueño humano se caracteriza por ciclos de aproximadamente 90 minutos que alternan entre distintas etapas: vigilia (W), sueño ligero (N1), sueño medio (N2), sueño profundo (N3 y N4 según el sistema de clasificación), y sueño REM (Movimientos Oculares Rápidos). Cada etapa tiene características electroencefalográficas específicas que los expertos utilizan para su identificación.
+
+Sin embargo, el análisis de hipnogramas---representaciones gráficas de estas etapas a lo largo del tiempo---presenta desafíos significativos:
+
+\begin{itemize}
+    \item \textbf{Variabilidad interobservador:} La concordancia entre expertos en la clasificación de etapas es del 80-83\%, introduciendo subjetividad en el análisis.
+    \item \textbf{Pérdida de información temporal:} Los métodos estadísticos tradicionales ignoran patrones secuenciales complejos y dependencias a largo plazo.
+    \item \textbf{Falta de integración:} Existe una desconexión entre los análisis de hipnogramas y la actividad eléctrica cerebral (EEG) subyacente.
+    \item \textbf{Escalabilidad limitada:} El análisis manual es costoso y no escalable para grandes poblaciones.
+\end{itemize}
+
+\subsection{Brecha de Conocimiento}
+
+Actualmente, no existen metodologías que apliquen modelos de lenguaje de gran escala (LLMs) y técnicas de procesamiento de lenguaje natural (NLP) para extraer información clínicamente relevante directamente de secuencias de hipnogramas, tratándolas como un ``lenguaje'' con semántica propia.
+
+\section{Justificación}
+\label{justificacion}
+
+\subsection{Relevancia Científica}
+
+La aplicación de técnicas de NLP a datos de sueño representa una innovación metodológica significativa. Los modelos de embeddings como Word2Vec y arquitecturas Transformer han demostrado excelente capacidad para capturar patrones complejos en secuencias temporales, una habilidad que podría transferirse al dominio de los hipnogramas.
+
+\subsection{Relevancia Clínica}
+
+La automatización del análisis de hipnogramas mediante IA permitiría:
+\begin{itemize}
+    \item \textbf{Diagnóstico más preciso:} Detección automatizada de fenotipos de trastornos del sueño.
+    \item \textbf{Medicina personalizada:} Identificación de perfiles individuales de sueño para tratamientos específicos.
+    \item \textbf{Reducción de costos:} Automatización del análisis de polisomnografías.
+\end{itemize}
+
+\subsection{Relevancia Social}
+
+En 2025, aproximadamente 30-40\% de la población mundial sufre trastornos del sueño. El análisis automatizado democratiza el acceso a diagnósticos de calidad y tiene potencial para aplicaciones de salud digital y telemedicina.
+
+\section{Preguntas de Investigación e Hipótesis}
+
+\subsection{Preguntas de Investigación}
+
+\textbf{P1:} ¿Es posible representar las etapas del sueño y sus transiciones mediante vectores de incrustación (embeddings) que capturen relaciones semánticas significativas?
+
+\textbf{P2:} ¿Los embeddings generados por Word2Vec y arquitecturas Transformer pueden discriminar entre patrones normales y patológicos del sueño?
+
+\textbf{P3:} ¿Cómo se correlacionan las representaciones vectoriales de hipnogramas con las características espectrales del EEG durante diferentes etapas del sueño?
+
+\textbf{P4:} ¿Puede un LLM fine-tuneado generar análisis clínicos interpretables a partir de embeddings de hipnogramas?
+
+\subsection{Hipótesis}
+
+\textbf{H1:} Los embeddings de Word2Vec capturarán relaciones de co-ocurrencia y transición entre etapas del sueño, agrupando patrones similares en el espacio vectorial.
+
+\textbf{H2:} Los modelos Transformer superarán a Word2Vec en capturar dependencias temporales a largo plazo, identificando ciclos completos de sueño y arquitectura global.
+
+\textbf{H3:} Existirá una correlación significativa entre la similitud de embeddings de hipnogramas y la similitud de patrones espectrales del EEG correspondiente.
+
+\textbf{H4:} Un LLM fine-tuneado podrá generar descripciones clínicas precisas y diagnósticos preliminares a partir únicamente de embeddings de secuencias de sueño.
+
+\section{Objetivos}
+
+\subsection{Objetivo General}
+
+Desarrollar un modelo basado en técnicas de procesamiento del lenguaje natural para analizar hipnogramas, generando representaciones vectoriales que capturen la dinámica funcional del sueño y permitan la extracción automatizada de información clínicamente relevante.
+
+\subsection{Objetivos Específicos}
+
+\begin{enumerate}
+    \item Implementar y evaluar modelos Word2Vec para generar embeddings de transiciones y secuencias de etapas del sueño a partir de 10 hipnogramas de segunda noche.
+    \item Desarrollar un encoder basado en arquitectura Transformer para capturar dependencias temporales a largo plazo en hipnogramas completos.
+    \item Analizar la estructura del espacio de embeddings mediante técnicas de reducción dimensional (PCA, t-SNE) y clustering para identificar fenotipos de sueño.
+    \item Correlacionar embeddings de hipnogramas con características espectrales del EEG (cuando disponible) o con métricas clínicas establecidas (latencia REM, eficiencia del sueño, fragmentación).
+    \item Explorar la aplicabilidad de LLMs fine-tuneados para generar análisis interpretativos de patrones de sueño a partir de embeddings.
+\end{enumerate}
+
+\section{Estructura de la Tesis}
+
+Esta tesis está organizada de la siguiente manera: el Capítulo 2 presenta el marco teórico, incluyendo fundamentos de sueño, EEG, redes neuronales, Word2Vec y arquitectura Transformer. El Capítulo 3 describe la metodología, incluyendo el preprocesamiento de datos y los modelos implementados. Los resultados se presentan en el Capítulo 4, seguidos de discusión y conclusiones en el Capítulo 5.
+
+
+\chapter{Marco Teórico}
+\chaptermark{Marco}
+\label{marcoteo}
+
+\section{Antecedentes}
+
+\subsection{HypnoGPT y la Integración de LLMs en Análisis del Sueño}
+
+En 2024, surge HypnoGPT \cite{hypnogpt2024}, un modelo pionero que aplica técnicas de procesamiento de lenguaje natural para el análisis automático de hipnogramas. Este modelo demuestra que las secuencias de etapas del sueño pueden ser tratadas como un lenguaje artificial, permitiendo la aplicación de modelos de lenguaje de gran escala para extraer información clínicamente relevante.
+
+HypnoGPT representa un avance significativo al mostrar que los LLMs no solo pueden clasificar etapas del sueño, sino también generar descripciones textuales de patrones del sueño y proporcionar diagnósticos preliminares basados en la arquitectura del sueño.
+
+\subsection{Modelos de Clasificación Automática del Sueño}
+
+Investigaciones previas han explorado el uso de redes neuronales convolucionales (CNNs) y redes neuronales recurrentes (LSTMs) para la clasificación automática de etapas del sueño. \cite{perslev2021usleep} desarrollaron U-Sleep, un modelo basado en U-Net que logró alta precisión en múltiples conjuntos de datos de polisomnografía.
+
+\cite{stephansen2018neural} demostraron que redes neuronales pueden diagnosticar narcolepsia con eficiencia comparable a expertos humanos, abriendo la puerta a la automatización del análisis del sueño.
+
+\subsection{Aplicaciones de Transformers en Señales Fisiológicas}
+
+La arquitectura Transformer ha sido adaptada exitosamente al análisis de señales temporales biomédicas. \cite{zhang2025transformer} presentaron una revisión comprehensiva de aplicaciones de Transformers en series temporales fisiológicas, destacando su capacidad para capturar dependencias a largo plazo en señales de EEG.
+
+\section{Definición de Conceptos Clave}
+
+\subsection{El Sueño y sus Etapas}
+
+El sueño es un estado fisiológico complejo caracterizado por cambios cíclicos en la actividad cerebral, movimientos oculares y actividad muscular. La clasificación estándar AASM (American Academy of Sleep Medicine) distingue las siguientes etapas:
+
+\begin{itemize}
+    \item \textbf{Vigilia (W):} Estado de alerta con actividad cerebral predominantemente en frecuencias beta ($>$15 Hz).
+    \item \textbf{Sueño N1:} Transición entre vigilia y sueño, caracterizado por actividad theta (4-7 Hz).
+    \item \textbf{Sueño N2:} Sueño ligero con presencia de complejos K y espículas del sueño.
+    \item \textbf{Sueño N3:} Sueño profundo (ondas lentas) con actividad delta dominante (0.5-4 Hz).
+    \item \textbf{Sueño REM:} Etapa caracterizada por movimientos oculares rápidos, atonía muscular y actividad cortical similar a la vigilia.
+\end{itemize}
+
+Estas etapas forman ciclos de aproximadamente 90 minutos que se repiten múltiples veces durante la noche.
+
+\subsection{El Hipnograma}
+
+Un hipnograma es la representación gráfica temporal de las etapas del sueño, típicamente registrada en épocas de 30 segundos. El hipnograma muestra la arquitectura del sueño, incluyendo:
+
+\begin{itemize}
+    \item La latencia de inicio del sueño (tiempo hasta N1)
+    \item La latencia del primer REM
+    \item La distribución de cada etapa durante la noche
+    \item Las transiciones entre etapas
+    \item La fragmentación del sueño
+\end{itemize}
+
+\subsection{Electroencefalografía y Polisomnografía}
+
+La electroencefalografía (EEG) registra la actividad eléctrica cerebral mediante electrodos colocados en el cuero cabelludo según el sistema 10-20. La polisomnografía (PSG) es el estudio completo del sueño que registra múltiples señales fisiológicas simultáneamente, incluyendo:
+
+\begin{itemize}
+    \item EEG (múltiples derivaciones)
+    \item EOG (electrooculografía)
+    \item EMG (electromiografía)
+    \item ECG (electrocardiografía)
+    \item Flujo respiratorio
+    \item Saturación de oxígeno
+\end{itemize}
+
+\subsection{Representación de Símbolos a Números}
+
+En el contexto de hipnogramas y NLP, las etapas del sueño deben ser convertidas de símbolos (W, N1, N2, N3, REM) a representaciones numéricas. Existen varias estrategias:
+
+\subsubsection{Codificación One-Hot}
+
+Cada etapa se representa como un vector binario donde solo una posición tiene valor 1:
+
+\begin{verbatim}
+W   → [1, 0, 0, 0, 0]
+N1  → [0, 1, 0, 0, 0]
+N2  → [0, 0, 1, 0, 0]
+N3  → [0, 0, 0, 1, 0]
+REM → [0, 0, 0, 0, 1]
+\end{verbatim}
+
+Esta codificación es simple pero no captura relaciones entre etapas.
+
+\subsubsection{Embeddings Aprendidos}
+
+Los embeddings son representaciones vectoriales densas de baja dimensionalidad que capturan relaciones semánticas. En lugar de vectores dispersos binarios, los embeddings son vectores densos de números reales aprendidos durante el entrenamiento del modelo.
+
+\section{Redes Neuronales}
+
+\subsection{De la Neurona Biológica a la Neurona Artificial}
+
+La neurona artificial está inspirada en la neurona biológica. La neurona biológica recibe señales a través de dendritas, procesa la información en el soma y envía la señal a través del axón. La neurona artificial simula este proceso:
+
+$$y = f\left(\sum_{i=1}^{n} w_i x_i + b\right)$$
+
+donde $x_i$ son las entradas, $w_i$ son los pesos, $b$ es el sesgo y $f$ es la función de activación.
+
+\subsection{Redes Neuronales Multicapa (MLP)}
+
+Las redes neuronales multicapa consisten en múltiples capas de neuronas:
+
+\begin{itemize}
+    \item \textbf{Capa de entrada:} Recibe los datos
+    \item \textbf{Capas ocultas:} Realizan transformaciones no lineales
+    \item \textbf{Capa de salida:} Produce la predicción final
+\end{itemize}
+
+Cada neurona en una capa está conectada a todas las neuronas de la siguiente capa (conectividad completa).
+
+\subsection{¿Cómo Aprenden las Redes Neuronales?}
+
+El aprendizaje se realiza mediante el algoritmo de retropropagación (backpropagation):
+
+\begin{enumerate}
+    \item \textbf{Forward pass:} Se propagan los datos hacia adelante, calculando las salidas.
+    \item \textbf{Cálculo de error:} Se compara la salida predicha con la esperada.
+    \item \textbf{Backward pass:} Se calculan los gradientes del error respecto a los pesos.
+    \item \textbf{Actualización:} Los pesos se actualizan para minimizar el error.
+\end{enumerate}
+
+Este proceso se repite durante muchas iteraciones (épocas) hasta converger a una solución.
+
+\section{Tokenización}
+
+\subsection{¿Qué es la Tokenización?}
+
+La tokenización es el proceso de dividir un texto en unidades más pequeñas llamadas tokens. En el contexto de hipnogramas, los tokens corresponden a las etapas del sueño.
+
+\subsubsection{Tokenización de Hipnogramas}
+
+Para un hipnograma:
+$$[7, 7, 0, 1, 2, 2, 3, 4, 5, 5, 2, 0, 6, \ldots]$$
+
+La tokenización simple considera cada número como un token. Sin embargo, una estrategia más sofisticada es crear tokens de transiciones:
+
+\begin{itemize}
+    \item \textbf{Bigramas:} Pares consecutivos de etapas: ``7→7'', ``7→0'', ``0→1'', etc.
+    \item \textbf{Trigramas:} Tripletas consecutivas: ``7→7→0'', ``7→0→1'', etc.
+\end{itemize}
+
+Estos n-gramas capturan el contexto temporal y las relaciones de transición entre etapas.
+
+\section{Word2Vec}
+
+\subsection{Fundamentos}
+
+Word2Vec \cite{mikolov2013efficient} es un algoritmo que aprende representaciones vectoriales de palabras basándose en el principio de distribución semántica: palabras que aparecen en contextos similares deberían tener representaciones similares.
+
+\subsection{Arquitecturas}
+
+Word2Vec ofrece dos arquitecturas principales:
+
+\subsubsection{CBOW (Continuous Bag of Words)}
+
+Predice una palabra central basándose en el contexto circundante:
+
+$$P(w_t | w_{t-n}, \ldots, w_{t-1}, w_{t+1}, \ldots, w_{t+n})$$
+
+\subsubsection{Skip-gram}
+
+Predice el contexto dada una palabra central:
+
+$$P(w_{t-n}, \ldots, w_{t-1}, w_{t+1}, \ldots, w_{t+n} | w_t)$$
+
+Skip-gram es preferida para datasets pequeños, como en nuestro caso con 10 hipnogramas.
+
+\subsection{Aplicación a Hipnogramas}
+
+Para aplicar Word2Vec a hipnogramas:
+
+\begin{enumerate}
+    \item Convertir secuencias numéricas en ``oraciones'' de tokens
+    \item Crear corpus de todos los hipnogramas
+    \item Entrenar modelo Word2Vec con ventana temporal
+    \item Extraer embeddings de cada etapa o transición
+\end{enumerate}
+
+Los embeddings resultantes capturan relaciones semánticas entre etapas (ej: N2 y N3 aparecen juntas frecuentemente).
+
+\section{Arquitectura Transformer}
+
+\subsection{Mecanismo de Atención}
+
+El Transformer \cite{vaswani2017attention} introduce el mecanismo de atención, que permite al modelo ``enfocarse'' en partes relevantes de la secuencia de entrada:
+
+$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+
+donde $Q$ (query), $K$ (key) y $V$ (value) son matrices aprendidas.
+
+\subsection{Auto-Atención}
+
+La auto-atención permite que cada posición de la secuencia atienda a todas las demás posiciones, capturando dependencias globales:
+
+$$Z = \text{Attention}(XW_Q, XW_K, XW_V)$$
+
+\subsection{Atención Multi-Cabeza}
+
+Múltiples cabezas de atención permiten capturar diferentes tipos de relaciones:
+
+$$\text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)W^O$$
+
+donde cada cabeza calcula atención en un subespacio diferente.
+
+\subsection{Codificación Posicional}
+
+Como los Transformers no usan recurrencia, necesitan codificación posicional para capturar el orden temporal:
+
+$$PE_{(pos, 2i)} = \sin(pos / 10000^{2i/d_{model}})$$
+$$PE_{(pos, 2i+1)} = \cos(pos / 10000^{2i/d_{model}})$$
+
+Esto permite al modelo entender relaciones temporales en los hipnogramas.
+
+\subsection{Ventajas para Análisis de Sueño}
+
+Los Transformers son especialmente adecuados para hipnogramas porque:
+
+\begin{itemize}
+    \item Capturan dependencias a largo plazo (ciclos de sueño completos)
+    \item Procesamiento paralelo eficiente
+    \item Mecanismo de atención identifica patrones complejos
+    \item Escalables a datasets grandes
+\end{itemize}
+
+\section{Modelos de Lenguaje de Gran Escala (LLMs)}
+
+\subsection{Evolución de los LLMs}
+
+Desde BERT \cite{devlin2019bert} hasta GPT-4, los LLMs han demostrado capacidades extraordinarias en comprensión y generación de lenguaje. Estos modelos, entrenados con miles de millones de parámetros en vastos corpus de texto, pueden:
+
+\begin{itemize}
+    \item Comprender contexto complejo
+    \item Generalizar a tareas nuevas
+    \item Generar texto coherente
+    \item Realizar razonamiento multiescalar
+\end{itemize}
+
+\subsection{Fine-tuning para Dominios Específicos}
+
+El fine-tuning permite adaptar LLMs pre-entrenados a dominios específicos (como análisis del sueño) con datasets relativamente pequeños, aprovechando el conocimiento previo del modelo.
+
+\subsection{Aplicación a Análisis de Hipnogramas}
+
+Un LLM fine-tuneado puede:
+
+\begin{enumerate}
+    \item Recibir embeddings de hipnogramas como entrada
+    \item Generar descripciones textuales de patrones del sueño
+    \item Proporcionar diagnósticos preliminares
+    \item Explicar por qué ciertos patrones son significativos
+\end{enumerate}
+
+Esto convierte el análisis de hipnogramas de una tarea de clasificación automática a una tarea de comprensión semántica profunda.
+
+%\chapter{Metodología}
+%\chaptermark{Metodología}
+%\label{metodologia}
+%
+%(Sección pendiente de completar)
+
+\chapter{Resultados}
+\chaptermark{Resultados}
+\label{resultados}
+
+(Sección pendiente de completar con resultados experimentales)
+
+\chapter{Discusión y Conclusiones}
+\chaptermark{Conclusiones}
+\label{conclusiones}
+
+(Sección pendiente de completar con análisis de resultados y conclusiones)
+
+
+
+
+
+\bibliographystyle{apa_esp}
+%\bibliographystyle{apa_esp}
+
+\bibliography{bibliografia_fc}
+
+\end{document}
